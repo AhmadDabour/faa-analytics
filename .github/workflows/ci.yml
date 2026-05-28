@@ -11,6 +11,7 @@ jobs:
         env:
           POSTGRES_DB: faa
           POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
