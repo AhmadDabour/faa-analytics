@@ -1,0 +1,48 @@
+name: FAA WorkFlow
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: faa
+          POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{secrets.DATABASE_URL}}
+        run: alembic upgrade head
+      - name: Run tests
+        env:
+          DATABASE_URL: ${{secrets.DATABASE_URL}}
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+        run: pytest

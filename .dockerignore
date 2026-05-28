@@ -1,0 +1,6 @@
+.env
+*.pyc
+__pycache__
+redis-data
+faa_backup.sql
+faa_backup.dump
